@@ -1,0 +1,15 @@
+services:
+  mongodb:
+    image: mongo:7.0
+    container_name: expensestracker-mongodb
+    restart: unless-stopped
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: expensestracker_admin
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_ROOT_PASSWORD:?Missing password}
+    ports:
+      - "127.0.0.1:27019:27017"
+    volumes:
+      - expensestracker_mongodb_data:/data/db
+
+volumes:
+  expensestracker_mongodb_data:
