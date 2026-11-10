@@ -1,0 +1,416 @@
+<div class="space-y-6 bg-white p-4">
+
+  <!-- Page Heading -->
+  <div class="flex flex-wrap items-center justify-between gap-4">
+    <div>
+      <div class="mb-2 flex items-center gap-2 text-sm text-slate-400">
+        <i class="pi pi-home"></i>
+        Dashboard
+        <i class="pi pi-angle-right text-xs"></i>
+        <span class="text-teal-700">Categories</span>
+      </div>
+
+      <h1 class="text-2xl font-bold text-slate-900">Categories</h1>
+      <p class="mt-1 text-sm text-slate-500">
+        Organize and manage your income and expense categories.
+      </p>
+    </div>
+
+    <button
+      type="button"
+      (click)="openCreateForm()"
+      class="flex items-center gap-2 rounded-xl bg-teal-700 px-5 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-teal-800">
+      <i class="pi pi-plus"></i>
+      Add Category
+    </button>
+  </div>
+
+  <!-- Summary Cards -->
+  <div class="grid grid-cols-1 gap-4 sm:grid-cols-3">
+
+    <div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+      <div class="flex items-center justify-between">
+        <span class="text-sm text-slate-500">Total Categories</span>
+        <div class="flex h-11 w-11 items-center justify-center rounded-xl bg-teal-50 text-teal-700">
+          <i class="pi pi-th-large text-xl"></i>
+        </div>
+      </div>
+      <h2 class="mt-3 text-3xl font-bold text-slate-900">{{ categories.length }}</h2>
+      <p class="mt-1 text-xs text-slate-400">All registered categories</p>
+    </div>
+
+    <div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+      <div class="flex items-center justify-between">
+        <span class="text-sm text-slate-500">Income Categories</span>
+        <div class="flex h-11 w-11 items-center justify-center rounded-xl bg-emerald-50 text-emerald-600">
+          <i class="pi pi-arrow-up text-xl"></i>
+        </div>
+      </div>
+      <h2 class="mt-3 text-3xl font-bold text-slate-900">{{ incomeCount }}</h2>
+      <p class="mt-1 text-xs text-slate-400">Categories for earnings</p>
+    </div>
+
+    <div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+      <div class="flex items-center justify-between">
+        <span class="text-sm text-slate-500">Expense Categories</span>
+        <div class="flex h-11 w-11 items-center justify-center rounded-xl bg-red-50 text-red-600">
+          <i class="pi pi-arrow-down text-xl"></i>
+        </div>
+      </div>
+      <h2 class="mt-3 text-3xl font-bold text-slate-900">{{ expenseCount }}</h2>
+      <p class="mt-1 text-xs text-slate-400">Categories for spending</p>
+    </div>
+  </div>
+
+  <!-- Success Message -->
+  @if (successMessage) {
+    <div class="flex items-center gap-3 rounded-xl border border-emerald-200 bg-emerald-50 p-4 text-sm text-emerald-700">
+      <i class="pi pi-check-circle text-lg"></i>
+      <span class="flex-1">{{ successMessage }}</span>
+    </div>
+  }
+
+  <!-- Error Message -->
+  @if (errorMessage) {
+    <div class="flex items-center gap-3 rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">
+      <i class="pi pi-exclamation-circle text-lg"></i>
+      <span class="flex-1">{{ errorMessage }}</span>
+    </div>
+  }
+
+  <!-- Add / Edit Category Form -->
+  @if (showForm) {
+    <section class="rounded-2xl border border-slate-200 bg-white shadow-sm">
+
+      <div class="flex items-center justify-between border-b border-slate-100 px-6 py-5">
+        <div class="flex items-center gap-3">
+          <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-teal-50 text-teal-700">
+            <i class="pi pi-folder-plus text-lg"></i>
+          </div>
+          <div>
+            <h2 class="font-semibold text-slate-900">
+              {{ editingId ? 'Edit Category' : 'Create New Category' }}
+            </h2>
+            <p class="text-xs text-slate-500">Enter category details below</p>
+          </div>
+        </div>
+
+        <button type="button" (click)="cancelForm()"
+          class="text-slate-400 hover:text-slate-700"
+          aria-label="Close form">
+          <i class="pi pi-times text-lg"></i>
+        </button>
+      </div>
+
+      <form #categoryForm="ngForm" (ngSubmit)="saveCategory()" class="space-y-5 p-6">
+
+        <div class="grid grid-cols-1 gap-5 md:grid-cols-2">
+
+          <div>
+            <label for="categoryName" class="mb-2 block text-sm font-medium text-slate-700">
+              Category Name <span class="text-red-500">*</span>
+            </label>
+            <div class="relative">
+              <i class="pi pi-tag absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"></i>
+              <input
+                id="categoryName"
+                name="name"
+                type="text"
+                [(ngModel)]="category.name"
+                #name="ngModel"
+                required
+                placeholder="e.g. Food, Transport, Salary"
+                class="w-full rounded-xl border border-slate-200 bg-slate-50 py-3 pl-11 pr-4 text-sm outline-none focus:border-teal-500 focus:bg-white focus:ring-2 focus:ring-teal-100"
+                [class.border-red-400]="name.invalid && name.touched"
+              />
+            </div>
+
+            @if (name.invalid && name.touched) {
+              <p class="mt-1 text-xs text-red-500">Please enter a category name.</p>
+            }
+          </div>
+
+          <div>
+            <label for="categoryType" class="mb-2 block text-sm font-medium text-slate-700">
+              Category Type <span class="text-red-500">*</span>
+            </label>
+            <select
+              id="categoryType"
+              name="type"
+              [(ngModel)]="category.type"
+              #type="ngModel"
+              required
+              class="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm outline-none focus:border-teal-500 focus:bg-white focus:ring-2 focus:ring-teal-100"
+              [class.border-red-400]="type.invalid && type.touched">
+              <option value="" disabled>Select a type</option>
+              <option value="EXPENSE">Expense</option>
+              <option value="INCOME">Income</option>
+            </select>
+
+            @if (type.invalid && type.touched) {
+              <p class="mt-1 text-xs text-red-500">Please choose a category type.</p>
+            }
+          </div>
+
+        </div>
+
+        <div class="flex justify-end gap-3 border-t border-slate-100 pt-5">
+          <button type="button" (click)="cancelForm()"
+            [disabled]="isSaving"
+            class="rounded-xl border border-slate-200 px-5 py-2.5 text-sm font-medium text-slate-600 hover:bg-slate-50 disabled:opacity-50">
+            Cancel
+          </button>
+
+          <button type="submit"
+            [disabled]="isSaving || categoryForm.invalid"
+            class="flex items-center gap-2 rounded-xl bg-teal-700 px-6 py-2.5 text-sm font-semibold text-white hover:bg-teal-800 disabled:cursor-not-allowed disabled:opacity-50">
+            <i [class]="isSaving ? 'pi pi-spin pi-spinner' : 'pi pi-check'"></i>
+            {{ isSaving ? 'Saving...' : (editingId ? 'Update Category' : 'Save Category') }}
+          </button>
+        </div>
+
+      </form>
+    </section>
+  }
+
+  <!-- Category Listing -->
+  <section class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+
+    <!-- Table Header -->
+    <div class="flex flex-wrap items-center justify-between gap-4 border-b border-slate-100 px-5 py-5">
+
+      <div>
+        <h2 class="font-semibold text-slate-900">All Categories</h2>
+        <p class="mt-1 text-xs text-slate-500">
+          Manage your registered categories
+        </p>
+      </div>
+
+      <span class="rounded-full bg-teal-50 px-3 py-2 text-xs font-semibold text-teal-700">
+        {{ categories.length }} Categories Saved
+      </span>
+
+      @if (categories.length > 0) {
+        <div class="relative w-full sm:w-72">
+          <i class="pi pi-search absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"></i>
+          <input
+            type="text"
+            name="search"
+            [(ngModel)]="searchTerm"
+            (ngModelChange)="onSearchChange()"
+            [ngModelOptions]="{ standalone: true }"
+            placeholder="Search categories..."
+            class="w-full rounded-xl border border-slate-200 bg-slate-50 py-2.5 pl-11 pr-10 text-sm outline-none focus:border-teal-500 focus:bg-white"
+          />
+
+          @if (searchTerm) {
+            <button
+              type="button"
+              (click)="clearSearch()"
+              class="absolute right-3 top-1/2 flex h-6 w-6 -translate-y-1/2 items-center justify-center rounded-full text-slate-400 transition hover:bg-slate-100 hover:text-slate-600"
+              aria-label="Clear search">
+              <i class="pi pi-times text-xs"></i>
+            </button>
+          }
+        </div>
+      }
+
+    </div>
+
+    <!-- Table -->
+    <div class="overflow-x-auto">
+      <table class="w-full min-w-[650px] text-left text-sm">
+
+        <thead class="bg-slate-50 text-xs uppercase text-slate-500">
+          <tr>
+            <th class="px-6 py-4">Category Name</th>
+            <th class="px-6 py-4">Type</th>
+            <th class="px-6 py-4 text-right">Actions</th>
+          </tr>
+        </thead>
+
+        <tbody class="divide-y divide-slate-100">
+
+          @for (item of pagedCategories; track item.id ?? item.name) {
+            <tr class="transition hover:bg-slate-50"
+              [class.bg-teal-50]="editingId && item.id === editingId">
+
+              <td class="px-6 py-4">
+                <div class="flex items-center gap-3">
+                  <div class="flex h-10 w-10 items-center justify-center rounded-xl"
+                    [ngClass]="item.type === 'INCOME' ? 'bg-emerald-50 text-emerald-600' : 'bg-orange-50 text-orange-600'">
+                    <i class="pi pi-tag text-lg"></i>
+                  </div>
+                  <span class="font-semibold text-slate-800">{{ item.name }}</span>
+                </div>
+              </td>
+
+              <td class="px-6 py-4">
+                <span
+                  class="rounded-full px-3 py-1 text-xs font-medium"
+                  [ngClass]="item.type === 'INCOME'
+                    ? 'bg-emerald-50 text-emerald-700'
+                    : 'bg-orange-50 text-orange-700'">
+                  {{ item.type }}
+                </span>
+              </td>
+
+              <td class="px-6 py-4">
+                <div class="flex justify-end gap-2">
+                  <button type="button"
+                    (click)="editCategory(item)"
+                    title="Edit category"
+                    class="flex h-9 w-9 items-center justify-center rounded-lg text-blue-600 hover:bg-blue-50">
+                    <i class="pi pi-pencil"></i>
+                  </button>
+
+                  <button type="button"
+                    (click)="confirmDelete(item)"
+                    title="Delete category"
+                    class="flex h-9 w-9 items-center justify-center rounded-lg text-red-600 hover:bg-red-50">
+                    <i class="pi pi-trash"></i>
+                  </button>
+                </div>
+              </td>
+
+            </tr>
+          } @empty {
+            <tr>
+              <td colspan="3" class="px-6 py-12 text-center">
+                @if (isLoading) {
+                  <i class="pi pi-spin pi-spinner text-3xl text-teal-600"></i>
+                  <p class="mt-3 font-medium text-slate-600">Loading categories...</p>
+                } @else {
+                  <i class="pi pi-folder-open text-4xl text-slate-300"></i>
+                  <p class="mt-3 font-medium text-slate-600">
+                    No categories found
+                  </p>
+                  <p class="mt-1 text-xs text-slate-400">
+                    Add a category or try another search.
+                  </p>
+                }
+              </td>
+            </tr>
+          }
+
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Table Footer + Pagination -->
+    @if (filteredCategories.length > 0) {
+      <div class="flex flex-wrap items-center justify-between gap-3 border-t border-slate-100 px-6 py-4">
+
+        <div class="flex flex-wrap items-center gap-3 text-xs text-slate-500">
+          <span>
+            Showing {{ startIndex }}–{{ endIndex }} of {{ filteredCategories.length }}
+            @if (filteredCategories.length !== categories.length) {
+              (filtered from {{ categories.length }})
+            }
+          </span>
+
+          <label class="flex items-center gap-2">
+            <span>Rows per page</span>
+            <select
+              name="pageSize"
+              [(ngModel)]="pageSize"
+              (ngModelChange)="onPageSizeChange()"
+              [ngModelOptions]="{ standalone: true }"
+              class="rounded-lg border border-slate-200 bg-white px-2 py-1.5 text-xs text-slate-600 outline-none focus:border-teal-500">
+              @for (size of pageSizeOptions; track size) {
+                <option [ngValue]="size">{{ size }}</option>
+              }
+            </select>
+          </label>
+        </div>
+
+        <div class="flex items-center gap-1">
+
+          <button
+            type="button"
+            (click)="goToPage(currentPage - 1)"
+            [disabled]="currentPage === 1"
+            class="flex h-9 w-9 items-center justify-center rounded-lg border border-slate-200 text-slate-600 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-40"
+            aria-label="Previous page">
+            <i class="pi pi-angle-left"></i>
+          </button>
+
+          @for (page of pageNumbers; track page) {
+            <button
+              type="button"
+              (click)="goToPage(page)"
+              class="h-9 min-w-9 rounded-lg border px-3 text-xs font-medium transition"
+              [ngClass]="page === currentPage
+                ? 'border-teal-700 bg-teal-700 text-white'
+                : 'border-slate-200 text-slate-600 hover:bg-slate-50'">
+              {{ page }}
+            </button>
+          }
+
+          <button
+            type="button"
+            (click)="goToPage(currentPage + 1)"
+            [disabled]="currentPage === totalPages"
+            class="flex h-9 w-9 items-center justify-center rounded-lg border border-slate-200 text-slate-600 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-40"
+            aria-label="Next page">
+            <i class="pi pi-angle-right"></i>
+          </button>
+
+        </div>
+      </div>
+    }
+
+  </section>
+
+</div>
+
+<!-- Delete Confirmation Modal -->
+@if (deleteTarget) {
+  <div
+    class="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 p-4"
+    (click)="cancelDelete()">
+    <div
+      class="w-full max-w-md rounded-2xl border border-slate-200 bg-white p-6 shadow-xl"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="delete-title"
+      (click)="$event.stopPropagation()">
+
+      <div class="flex items-start gap-4">
+        <div class="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-red-50 text-red-600">
+          <i class="pi pi-trash text-lg"></i>
+        </div>
+
+        <div>
+          <h3 id="delete-title" class="font-semibold text-slate-900">
+            Delete this category?
+          </h3>
+
+          <p class="mt-2 text-sm text-slate-500">
+            <span class="font-medium text-slate-700">{{ deleteTarget.name }}</span>
+            ({{ deleteTarget.type }}) will be permanently removed. This can't be undone.
+          </p>
+        </div>
+      </div>
+
+      <div class="mt-6 flex justify-end gap-3">
+        <button
+          type="button"
+          (click)="cancelDelete()"
+          [disabled]="isDeleting"
+          class="rounded-xl border border-slate-200 bg-white px-5 py-2.5 text-sm font-medium text-slate-600 transition hover:bg-slate-50 disabled:opacity-50">
+          Cancel
+        </button>
+
+        <button
+          type="button"
+          (click)="deleteCategory()"
+          [disabled]="isDeleting"
+          class="flex items-center gap-2 rounded-xl bg-red-600 px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-red-700 disabled:cursor-not-allowed disabled:opacity-50">
+          <i [class]="isDeleting ? 'pi pi-spin pi-spinner' : 'pi pi-trash'"></i>
+          {{ isDeleting ? 'Deleting...' : 'Delete Category' }}
+        </button>
+      </div>
+    </div>
+  </div>
+}
